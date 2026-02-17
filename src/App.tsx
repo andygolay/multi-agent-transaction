@@ -1,11 +1,10 @@
-import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
+import { MovementWalletAdapterProvider } from "@moveindustries/wallet-adapter-react";
 import { MultiAgentTest } from "./MultiAgentTest";
 import "./App.css";
 
-// Key: NO dappConfig - let the wallet handle its own network
 function App() {
   return (
-    <AptosWalletAdapterProvider
+    <MovementWalletAdapterProvider
       autoConnect={true}
       optInWallets={["Petra", "Nightly", "Razor Wallet"]}
       onError={(error) => {
@@ -18,7 +17,7 @@ function App() {
         <hr />
         <MultiAgentTest />
       </div>
-    </AptosWalletAdapterProvider>
+    </MovementWalletAdapterProvider>
   );
 }
 

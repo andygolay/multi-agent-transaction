@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@moveindustries/wallet-adapter-react";
 import {
-  Aptos,
-  AptosConfig,
+  Movement,
+  MovementConfig,
   Network,
   AccountAddress,
   U64,
@@ -10,10 +10,7 @@ import {
   Hex,
   AccountAuthenticator,
   MultiAgentTransaction,
-} from "@aptos-labs/ts-sdk";
-
-// Movement testnet config
-const MOVEMENT_URL = "https://testnet.movementnetwork.xyz/v1";
+} from "@moveindustries/ts-sdk";
 
 export function MultiAgentTest() {
   const {
@@ -67,11 +64,8 @@ export function MultiAgentTest() {
 
       const bytecode = await loadScript();
 
-      const config = new AptosConfig({
-        network: Network.CUSTOM,
-        fullnode: MOVEMENT_URL,
-      });
-      const aptos = new Aptos(config);
+      const config = new MovementConfig({ network: Network.TESTNET });
+      const movement = new Movement(config);
 
       // For this test, we'll use a placeholder for second signer
       // In real flow, this would be known ahead of time
@@ -89,7 +83,7 @@ export function MultiAgentTest() {
       const depositFirst = 1000;
 
       log("Building multi-agent transaction (5 min expiration)...");
-      const transaction = await aptos.transaction.build.multiAgent({
+      const transaction = await movement.transaction.build.multiAgent({
         sender: AccountAddress.from(account.address),
         secondarySignerAddresses: [AccountAddress.from(secondSignerAddr)],
         data: {
@@ -216,8 +210,8 @@ export function MultiAgentTest() {
       });
       log("Wallet signed successfully");
 
-      // Submit using wallet adapter's submitTransaction (to reproduce friend's error)
-      log("Submitting via WALLET ADAPTER submitTransaction...");
+      // Submit using wallet adapter's submitTransaction (patched to handle Nightly's "custom" network)
+      log("Submitting via wallet adapter submitTransaction...");
       const tx = await submitTransaction({
         transaction,
         senderAuthenticator: senderSignature.authenticator,
@@ -227,14 +221,11 @@ export function MultiAgentTest() {
       log(`SUCCESS! Transaction hash: ${tx.hash}`);
 
       // Wait for confirmation using SDK
-      const config = new AptosConfig({
-        network: Network.CUSTOM,
-        fullnode: MOVEMENT_URL,
-      });
-      const aptos = new Aptos(config);
+      const config = new MovementConfig({ network: Network.TESTNET });
+      const movement = new Movement(config);
 
       log("Waiting for confirmation...");
-      const result = await aptos.waitForTransaction({
+      const result = await movement.waitForTransaction({
         transactionHash: tx.hash,
       });
       log(`Transaction confirmed: ${result.success}`);
